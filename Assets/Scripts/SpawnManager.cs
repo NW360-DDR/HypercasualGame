@@ -11,8 +11,9 @@ public class SpawnManager : MonoBehaviour
     int total;
     int randomNum;
     public float frequency;
-    float currentTime;
+    public float currentTime = -3.0f;
     public bool GameOver = false;
+    bool Unbroken = false;
     // Minimum and maximum height for spawning, mess around with in case items spawn that can kill the enemy when not moving. Very bad thing.
     float minH = -3;
     float maxH = 3;
@@ -31,11 +32,11 @@ public class SpawnManager : MonoBehaviour
         if (GameOver)
         {
             Destroy(GameObject.Find("Player"));
-            Wait(3);
-            SceneManager.LoadScene("SampleScene");
+            StartCoroutine(Wait(3));
         }
         else if (currentTime >= frequency)
         {
+            Unbroken = true;
             currentTime = 0;
             randomNum = Random.Range(0, total);
             spawnPrefab(randomNum);
@@ -45,30 +46,63 @@ public class SpawnManager : MonoBehaviour
 
     void spawnPrefab(int index)
     {
-        // If our generated number is too large for the enemy array, it must be for a powerup, which is yet to be implemented.
-        // This if statement assumes that our number is, in fact, small enough.
-        if (index < enemyPrefabs.Length)
-        {
-            float leftRight = Random.Range(0, 1.0f);
-            Vector3 newpos;
-            // I promise this looks weird but I really don't want to allocate space for another float.
-            if (leftRight >= 0.5){ // Going left, starting negative
-                leftRight = 1;
-                newpos = new Vector2(3, Random.Range(minH, maxH));
-            }
-            else // Going right, starting positive
+        while (Unbroken){
+
+            // If our generated number is too large for the enemy array, it must be for a powerup.
+            // This if statement assumes that the combined totals are, in fact, small enough to not overflow the int data type, which I bleeping hope so.
+            if (index < enemyPrefabs.Length)
             {
-                leftRight = -1;
-                newpos = new Vector2(-3, Random.Range(minH, maxH));
+                float leftRight = Random.Range(0, 1.0f);
+                Vector3 newpos;
+                // I promise this looks weird but I really don't want to allocate space for another float.
+                if (leftRight >= 0.5) { // Going left, starting negative
+                    leftRight = 1;
+                    newpos = new Vector2(3, Random.Range(minH, maxH));
+                }
+                else // Going right, starting positive
+                {
+                    leftRight = -1;
+                    newpos = new Vector2(-3, Random.Range(minH, maxH));
+                }
+                GameObject newThing = Instantiate(enemyPrefabs[index], newpos, enemyPrefabs[index].transform.rotation);
+                PrefabMove scrip = newThing.GetComponent<PrefabMove>();
+                scrip.WhichSide = ((int)leftRight);
+                Unbroken = false;
             }
-            GameObject newThing = Instantiate(enemyPrefabs[index], newpos, enemyPrefabs[index].transform.rotation);
-            PrefabMove scrip = newThing.GetComponent<PrefabMove>();
-            scrip.WhichSide = ((int)leftRight);
+            else
+            {
+                if (Random.Range(1, 10) <= 3) // Just in case powerups get broken, when they are called they have a 70% chance to instead become a random enemy item.
+                {
+                    float leftRight = Random.Range(0, 1.0f);
+                    Vector3 newpos;
+                    // I promise this looks weird but I really don't want to allocate space for another float.
+                    if (leftRight >= 0.5)
+                    { // Going left, starting negative
+                        leftRight = 1;
+                        newpos = new Vector2(3, Random.Range(minH, maxH));
+                    }
+                    else // Going right, starting positive
+                    {
+                        leftRight = -1;
+                        newpos = new Vector2(-3, Random.Range(minH, maxH));
+                    }
+                    GameObject newThing = Instantiate(powerupPrefabs[index - enemyPrefabs.Length], newpos, powerupPrefabs[index - enemyPrefabs.Length].transform.rotation);
+                    PrefabMove scrip = newThing.GetComponent<PrefabMove>();
+                    scrip.WhichSide = ((int)leftRight);
+                    Unbroken = false;
+                }
+                else
+                {
+                    Unbroken = true;
+                }
+            }
         }
     }
 
     IEnumerator Wait(float time)
     {
         yield return new WaitForSeconds(time);
+        SceneManager.LoadScene("SampleScene");
     }
+
 }

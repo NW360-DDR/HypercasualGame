@@ -6,7 +6,8 @@ TagManager:
   tags:
   - Base
   - Hazard
-  - Powerup
+  - Plus5
+  - Nuke
   layers:
   - Default
   - TransparentFX
