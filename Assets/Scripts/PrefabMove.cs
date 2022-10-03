@@ -18,5 +18,12 @@ public class PrefabMove : MonoBehaviour
         }
     }
 
-    
+    private void OnCollisionEnter2D(Collision2D thing)
+    {
+        if (thing.gameObject.CompareTag("Player")){
+            Destroy(gameObject);
+        }
+    }
+
+
 }

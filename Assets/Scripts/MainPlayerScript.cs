@@ -57,16 +57,16 @@ public class MainPlayerScript : MonoBehaviour
                 beeps.PlayOneShot(sounds[1]);
                 break;
             case "Hazard":
-                beeps.Stop();
                 beeps.PlayOneShot(sounds[2]);
                 scoreText.text = "Game Over!\nScore: " + score.ToString();
                 GameObject.Find("SpawnManager").GetComponent<SpawnManager>().GameOver = true;
                 moving = false;
                 break;
             case "Plus5":
+                beeps.PlayOneShot(sounds[3]);
                 IncrementScore(5);
                 Destroy(thing.gameObject);
-                beeps.PlayOneShot(sounds[3]);
+                
                 break;
             case "Nuke":
                 beeps.PlayOneShot(sounds[3]);
